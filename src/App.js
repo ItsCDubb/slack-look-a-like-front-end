@@ -1,58 +1,76 @@
-import React from 'react';
-import logo from './logo.svg';
-import { Counter } from './features/counter/Counter';
-import './App.css';
+import React from "react";
+import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import { useAuthState } from "react-firebase-hooks/auth";
+import Sidebar from "../src/components/Sidebar/Sidebar";
+import Header from "../src/components/Header/Header";
+import Login from "../src/components/Login/Login";
+import Chat from "../src/components/Chat/Chat";
+import styled from "styled-components";
+import { auth } from "../src/firebase";
+import Spinner from "react-spinkit";
+import "./App.css";
 
 function App() {
+  const [user, loading] = useAuthState(auth);
+  if (loading) {
+    return (
+      <AppLoading>
+        <AppLoadingContents>
+          <img
+            src="https://cdn.mos.cms.futurecdn.net/SDDw7CnuoUGax6x9mTo7dd.jpg"
+            alt=""
+          />
+          <Spinner name="ball-spin-fade-loader" color="purple" fadeIn="none" />
+        </AppLoadingContents>
+      </AppLoading>
+    );
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <Counter />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <span>
-          <span>Learn </span>
-          <a
-            className="App-link"
-            href="https://reactjs.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            React
-          </a>
-          <span>, </span>
-          <a
-            className="App-link"
-            href="https://redux.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Redux
-          </a>
-          <span>, </span>
-          <a
-            className="App-link"
-            href="https://redux-toolkit.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Redux Toolkit
-          </a>
-          ,<span> and </span>
-          <a
-            className="App-link"
-            href="https://react-redux.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            React Redux
-          </a>
-        </span>
-      </header>
+    <div className="app">
+      <Router>
+        {!user ? (
+          <Login />
+        ) : (
+          <>
+            <Header />
+            <AppBody>
+              <Sidebar />
+              <Switch>
+                <Route path="/" exact>
+                  <Chat />
+                </Route>
+              </Switch>
+            </AppBody>
+          </>
+        )}
+      </Router>
     </div>
   );
 }
 
 export default App;
+
+const AppBody = styled.div`
+  display: flex;
+  height: 100vh;
+`;
+const AppLoading = styled.div`
+  display: grid;
+  place-items: center;
+  height: 100vh;
+  width: 100%;
+`;
+const AppLoadingContents = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+  padding-bottom: 100px;
+  > img {
+    height: 100px;
+    padding: 20px;
+    margin-bottom: 40px;
+  }
+`;
